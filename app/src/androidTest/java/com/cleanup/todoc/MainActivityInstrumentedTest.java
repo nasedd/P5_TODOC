@@ -1,11 +1,15 @@
 package com.cleanup.todoc;
 
 
+import android.content.Context;
 import android.view.View;
 import android.widget.TextView;
 
+import com.cleanup.todoc.database.AppDatabase;
 import com.cleanup.todoc.ui.MainActivity;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,9 +25,13 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
+import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.rule.ActivityTestRule;
+
+import java.io.IOException;
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -34,7 +42,20 @@ import androidx.test.rule.ActivityTestRule;
 @RunWith(AndroidJUnit4.class)
 public class MainActivityInstrumentedTest {
     @Rule
-    public ActivityScenarioRule<MainActivity> rule = new ActivityScenarioRule<>(MainActivity.class);
+    public ActivityTestRule<MainActivity> mActivityRule = new ActivityTestRule(MainActivity.class);
+    //public ActivityScenarioRule<MainActivity> rule = new ActivityScenarioRule<>(MainActivity.class);
+
+    private AppDatabase appDatabase;
+
+    @Before
+    public void createDb() {
+        Context context = ApplicationProvider.getApplicationContext();
+        appDatabase = Room.inMemoryDatabaseBuilder(context, AppDatabase.class).build();
+    }
+    @After
+    public void closeDb() throws IOException {
+        appDatabase.close();
+    }
 
     @Test
     public void addAndRemoveTask() {
