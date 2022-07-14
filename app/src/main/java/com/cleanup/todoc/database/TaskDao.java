@@ -25,5 +25,8 @@ public interface TaskDao {
     @Query("SELECT * FROM Task")
     LiveData<List<Task>> getTaskList();
 
+    @Query("DELETE FROM Task")
+    void deleteAllTask();
+
 
 }

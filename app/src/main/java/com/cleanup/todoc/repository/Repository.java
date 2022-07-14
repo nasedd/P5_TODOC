@@ -38,6 +38,10 @@ public class Repository {
         return appDatabase.taskDao().getTaskList();
     }
 
+    public void deleteAllTasks(){
+        appDatabase.taskDao().deleteAllTask();
+    }
+
     public void addProject(Project project){
         Thread thread3 = new Thread(){
             public void run(){ appDatabase.projectDao().addProject(project);}
