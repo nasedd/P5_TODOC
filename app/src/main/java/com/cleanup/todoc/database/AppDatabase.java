@@ -36,6 +36,16 @@ public abstract class AppDatabase extends RoomDatabase {
         return DATABASE;
     }
 
+    public static AppDatabase instantiateAppDatabaseInMemory(Context context){
+
+        DATABASE = Room.inMemoryDatabaseBuilder(context, AppDatabase.class)
+                .addCallback(prepopulateDatabase())
+                .addMigrations(MIGRATION_1_2)
+                .build();
+
+        return DATABASE;
+    }
+
     static final Migration MIGRATION_1_2 = new Migration(1, 2) {
         @Override
         public void migrate(SupportSQLiteDatabase database) {

@@ -8,12 +8,17 @@ import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static com.cleanup.todoc.TestUtils.withRecyclerView;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
@@ -43,67 +48,49 @@ import java.util.List;
 @LargeTest
 public class UITest {
 
-    private AppDatabase appDatabase;
-    Repository repository = DI.getRepository(ApplicationProvider.getApplicationContext());
+    class MemoryDBActivityRule extends ActivityTestRule<MainActivity> {
+        public MemoryDBActivityRule(Class<MainActivity> activityClass) {
+            super(activityClass);
+        }
+
+        @Override
+        protected void beforeActivityLaunched() {
+            DI.setDatabaseForTest(true);
+            super.beforeActivityLaunched();
+        }
+    }
 
     @Rule
-    //public ActivityScenarioRule<MainActivity> activityRule = new ActivityScenarioRule<>(MainActivity.class);
-    //public ActivityTestRule<MainActivity> mActivityRule = new ActivityTestRule(MainActivity.class);
-    public InstantTaskExecutorRule instantTaskExecutorRule = new InstantTaskExecutorRule();// permet d'executer les taches de manière synchrone
-
-
-    @Before
-    public void createDb() {
-        Context context = ApplicationProvider.getApplicationContext();
-        appDatabase = Room.inMemoryDatabaseBuilder(context, AppDatabase.class).build();
-    }
-    @After
-    public void closeDb() throws IOException {
-        appDatabase.close();
-    }
-
+    public MemoryDBActivityRule rule = new MemoryDBActivityRule(MainActivity.class);
 
     @Test
-    public void insertAndGetTask() throws InterruptedException {
-        this.appDatabase.projectDao().addProject(new Project(1L, "Projet Tartampion", 0xFFEADAD1));
-        this.appDatabase.taskDao().addTask(new Task(1,"Task 1",new Date().getTime()));
-        this.appDatabase.taskDao().addTask(new Task(1,"Task 2",new Date().getTime()));
-        this.appDatabase.taskDao().addTask(new Task(1,"Task 3",new Date().getTime()));
+    public void addAndRemoveTask() {
+        MainActivity activity = rule.getActivity();
+        TextView lblNoTask = activity.findViewById(R.id.lbl_no_task); //the image no task
+        RecyclerView listTasks = activity.findViewById(R.id.list_tasks); //the recyclerView list
 
-        List<Task> tasks = LiveDataTestUtil.getValue(this.appDatabase.taskDao().getTaskList());
-        assertEquals(3, tasks.size());
-    }
+        //Add tasks
+        onView(withId(R.id.fab_add_task)).perform(click());
+        onView(withId(R.id.txt_task_name)).perform(replaceText("Tâche example"));
+        onView(withId(android.R.id.button1)).perform(click());
 
-    @Test
-    public void insertAndDeleteTask() throws InterruptedException {
-        // Adding demo project & demo task. Next, get the task added & delete it.
-        this.appDatabase.projectDao().addProject(new Project(1L, "Projet Tartampion", 0xFFEADAD1));
-        this.appDatabase.taskDao().addTask(new Task(1,"Task 1",new Date().getTime()));
-        List<Task> tasks = LiveDataTestUtil.getValue(this.appDatabase.taskDao().getTaskList());
-        this.appDatabase.taskDao().deleteTask(tasks.get(0));
+        // Check that "NO TASK" is not displayed anymore
+        assertThat(lblNoTask.getVisibility(), equalTo(View.GONE));
+        // Check that recyclerView is displayed
+        assertThat(listTasks.getVisibility(), equalTo(View.VISIBLE));
+        // Check that it contains one element only
+        assertThat(listTasks.getAdapter().getItemCount(), equalTo(1));
 
-        tasks = LiveDataTestUtil.getValue(this.appDatabase.taskDao().getTaskList());
-        assertEquals(0,tasks.size());
-        assertTrue(tasks.isEmpty());
+        onView(withId(R.id.img_delete)).perform(click());
 
-
+        // Check that lblTask is displayed
+        assertThat(lblNoTask.getVisibility(), equalTo(View.VISIBLE));
+        // Check that recyclerView is not displayed anymore
+        assertThat(listTasks.getVisibility(), equalTo(View.GONE));
     }
 
     @Test
-    public void sortTasks2() {
-        //ActivityScenarioRule<MainActivity> activityRule = new ActivityScenarioRule<>(MainActivity.class);
-        /*
-        mActivityRule.getActivity();
-        activityRule.getScenario().onActivity(activity -> {
-
-        });
-         */
-        ActivityTestRule<MainActivity> mActivityRule = new ActivityTestRule(MainActivity.class);
-        MainActivity mainActivity = mActivityRule.getActivity();
-
-
-        //Delete all tasks
-        repository.deleteAllTasks();
+    public void sortTasks() {
 
         //Add tasks
         onView(withId(R.id.fab_add_task)).perform(click());
@@ -164,7 +151,7 @@ public class UITest {
                 .check(matches(withText("aaa Tâche example")));
 
         //Delete all tasks
-        repository.deleteAllTasks();
+        //repository.deleteAllTasks();
 
     }
 }

@@ -72,13 +72,6 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         setContentView(R.layout.activity_main);
 
         taskViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(this)).get(TaskViewModel.class);
-
-        //repository = DI.getRepository(this);
-        //repository.addProject(new Project(1L, "Projet Tartampion", 0xFFEADAD1));
-        //repository.addTask(new Task(1L,"test",new Date().getTime()));
-
-        //tasks = taskViewModel.getTaskList().getValue();
-
         recyclerViewTasks = findViewById(R.id.list_tasks); //recyclerView
         lblNoTasks = findViewById(R.id.lbl_no_task); //textView "no task"
 
