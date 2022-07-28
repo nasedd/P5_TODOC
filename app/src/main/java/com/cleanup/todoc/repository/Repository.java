@@ -3,6 +3,7 @@ package com.cleanup.todoc.repository;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
+import androidx.room.Query;
 
 import com.cleanup.todoc.database.AppDatabase;
 import com.cleanup.todoc.model.Project;
@@ -38,6 +39,18 @@ public class Repository {
         return appDatabase.taskDao().getTaskList();
     }
 
+    public LiveData<List<Task>> getTaskListOld(){
+        return appDatabase.taskDao().getTaskListOld();
+    }
+
+    public LiveData<List<Task>> getTaskListAZ(){
+        return appDatabase.taskDao().getTaskListAZ();
+    }
+
+    public LiveData<List<Task>> getTaskListZA(){
+        return appDatabase.taskDao().getTaskListZA();
+    }
+
     public void deleteAllTasks(){
         appDatabase.taskDao().deleteAllTask();
     }
@@ -47,5 +60,9 @@ public class Repository {
             public void run(){ appDatabase.projectDao().addProject(project);}
         };
         thread3.start();
+    }
+
+    public LiveData<List<Project>> getAllProjects(){
+        return appDatabase.projectDao().getAllProjects();
     }
 }

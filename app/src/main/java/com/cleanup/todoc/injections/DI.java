@@ -14,7 +14,7 @@ public class DI {
         DI.databaseForTest = databaseForTest;
     }
 
-    public static Repository getRepository(Context context){
+    public static Repository getRepository(Context context){//singleton
         if(repository == null){
             if (databaseForTest){
                 AppDatabase db = AppDatabase.instantiateAppDatabaseInMemory(context);

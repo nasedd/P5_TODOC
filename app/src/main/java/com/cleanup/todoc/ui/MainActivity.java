@@ -27,6 +27,7 @@ import com.cleanup.todoc.model.SortMethod;
 import com.cleanup.todoc.model.Task;
 import com.cleanup.todoc.repository.Repository;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -39,12 +40,7 @@ import java.util.List;
  */
 public class MainActivity extends AppCompatActivity implements TasksAdapter.DeleteTaskListener {
 
-
-
-    AppDatabase appDatabase;
-    private Repository repository ;//= DI.getRepository();
-
-    private final Project[] allProjects = Project.getAllProjects();
+    private Project[] allProjects;// = Project.getAllProjects();
     @NonNull
     private List<Task> tasks;// = new ArrayList<>();
     private TasksAdapter adapter;
@@ -72,18 +68,20 @@ public class MainActivity extends AppCompatActivity implements TasksAdapter.Dele
         setContentView(R.layout.activity_main);
 
         taskViewModel = new ViewModelProvider(this, ViewModelFactory.getInstance(this)).get(TaskViewModel.class);
+
         recyclerViewTasks = findViewById(R.id.list_tasks); //recyclerView
         lblNoTasks = findViewById(R.id.lbl_no_task); //textView "no task"
 
-        taskViewModel.liveTasks.observe(this, list -> {
+        taskViewModel.liveProjects.observe(this, list -> {
             if(list == null){return;}
-            adapter = new TasksAdapter(list, this);
-            updateTasks(list);
-            recyclerViewTasks.setAdapter(adapter);
+            allProjects = new Project[list.size()];
+            list.toArray(allProjects);
         });
 
         taskViewModel.sortedTasks.observe(this, list -> {
+            adapter = new TasksAdapter(list, this);
             updateTasks(list);
+            recyclerViewTasks.setAdapter(adapter);
         });
 
 
